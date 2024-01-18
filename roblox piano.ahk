@@ -1,5 +1,5 @@
 ﻿#SingleInstance, force
-
+Gui, +AlwaysOnTop
 Gui, Add, Text,, BPM (beats per minute)
 Gui, Add, Edit, w300 vBPM, 100
 Gui, Add, Text,, music sheet (keys to press)
@@ -12,15 +12,26 @@ Gui, Show
 
 Numpad1::
 Gui, Submit, Nohide
-PianoMusic := RegExReplace(PianoMusic, "[\n\r/ ]")
-KeyDelay := 60 / BPM
+PianoMusic := RegExReplace(PianoMusic, "[\n\r/]")
+KeyDelay := 60000 / BPM
 X := 1
 while (X := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, X))
 {
     X += StrLen(Keys)
     Keys := Trim(Keys, "[]")
-    SendInput % Keys
-    Sleep, KeyDelay * 500
+    if (Keys = " ")
+    {
+        Sleep, KeyDelay * 0.5
+    }
+    else if (Keys = "|")
+    {
+        Sleep, KeyDelay
+    }
+    else
+    {
+        SendInput % Keys
+        Sleep, KeyDelay * 0.5
+    }
 }
 return
 
