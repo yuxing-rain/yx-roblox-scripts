@@ -1,4 +1,10 @@
 ﻿#SingleInstance, force
+StringCaseSense, On
+
+Is_Upper(x) {
+  return (X >= "A") and (X <= "Z")
+}
+
 Gui, +AlwaysOnTop
 Gui, Add, Text,, BPM (beats per minute)
 Gui, Add, Edit, w300 vBPM, 100
@@ -26,6 +32,10 @@ while (X := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, X))
     else if (Keys = "|")
     {
         Sleep, KeyDelay
+    }
+    else if (Is_Upper(Keys))
+    {
+        SendInput +%Keys%
     }
     else
     {
