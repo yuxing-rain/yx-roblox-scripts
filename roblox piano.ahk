@@ -12,7 +12,7 @@ Gui, Show
 
 Numpad1::
 Gui, Submit, Nohide
-PianoMusic := RegExReplace(PianoMusic, "[\n\r/]")
+PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", " ")
 KeyDelay := (60000 / BPM)
 X := 1
 while (X := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, X))
