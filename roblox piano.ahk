@@ -18,7 +18,7 @@ Gui, Show
 
 Numpad1::
 Gui, Submit, Nohide
-PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", " ")
+PianoMusic := RegExReplace(PianoMusic, "[\n\r/-]", " ")
 KeyDelay := (60000 / BPM)
 X := 1
 while (X := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, X))
@@ -27,7 +27,7 @@ while (X := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, X))
     Keys := Trim(Keys, "[]")
     if (Keys = " ")
     {
-        Sleep, KeyDelay * 0.5
+        Sleep, KeyDelay * 0.3
     }
     else if (Keys = "|")
     {
@@ -35,11 +35,15 @@ while (X := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, X))
     }
     else if (Is_Upper(Keys))
     {
-        SendInput +%Keys%
+        SendInput, +{%Keys% down}
+        Sleep, KeyDelay * 0.3
+        SendInput, +{%Keys% up}
     }
     else
     {
-        SendInput % Keys
+        SendInput, {%Keys% down}
+        Sleep, KeyDelay * 0.3
+        SendInput, {%Keys% up}
     }
 }
 return
