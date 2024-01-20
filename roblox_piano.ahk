@@ -17,7 +17,9 @@ GuiX := ScreenWidth - GuiWidth - 120
 
 Gui, Add, Text,, BPM (beats per minute)
 Gui, Add, Edit, w%GuiWidth% vBPM, 100
-Gui, Add, Checkbox, vIgnore_n, Ignore \n
+Gui, Add, Text,, Transposition
+Gui, Add, Edit, w%GuiWidth% vTranspos, 0
+Gui, Add, Checkbox, vno_ignore_n, Don't ignore \n
 Gui, Add, Text,, music sheet (keys to press)
 Gui, Add, Edit, r5 w%GuiWidth% vPianoMusic
 Gui, Add, Button, gSaveSheet, Save Sheet
@@ -31,17 +33,18 @@ Gui, Show, x%GuiX%
 
 Numpad1::
 Gui, Submit, Nohide
-If (Ignore_n)
+If (no_ignore_n)
 {
-    PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", "")
+    PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", " ")
 }
 Else
 {
-    PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", " ")
+    PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", "")
 }
 
 KeyDelay := (60000 / BPM)
 N := 1
+
 while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 {
     N += StrLen(Keys)
@@ -102,11 +105,12 @@ SaveSheet:
     if ((SheetName != ""))
     {
         GuiControlGet, BPM, , BPM
+        GuiControlGet, Transpos, , Transpos
         GuiControlGet, PianoMusic, , PianoMusic
         IfNotExist, %A_ScriptDir%\MusicSheets
             FileCreateDir, %A_ScriptDir%\MusicSheets
         FileDelete, %A_ScriptDir%\MusicSheets\%SheetName%.txt
-        FileAppend, {%BPM%} %PianoMusic%, %A_ScriptDir%\MusicSheets\%SheetName%.txt
+        FileAppend, <%Transpos%>{%BPM%}%PianoMusic%, %A_ScriptDir%\MusicSheets\%SheetName%.txt
     }
 return
 
@@ -115,13 +119,15 @@ LoadSheet:
     if ((file != ""))
     {
         FileRead, str, %file%
-        if (RegExMatch(str, "{([^{}]*)}", match))
-        {
-            FindBpm := StrReplace(match, "{", "")
-            FindBpm := StrReplace(FindBpm, "}", "")
-            Sheet := StrReplace(str, match, "")
-            GuiControl,, BPM, %FindBpm%
-            GuiControl,, PianoMusic, %Sheet%
-        }
+
+        RegExMatch(str, "<([^<>]*)>", TransposMatch)
+        Transpos := TransposMatch1
+        str := StrReplace(str, TransposMatch, "")
+        RegExMatch(str, "{([^{}]*)}", BpmMatch)
+        Bpm := BpmMatch1
+        str := StrReplace(str, BpmMatch, "")
+        GuiControl,, Transpos, %Transpos%
+        GuiControl,, BPM, %Bpm%
+        GuiControl,, PianoMusic, %str%
     }
 return
