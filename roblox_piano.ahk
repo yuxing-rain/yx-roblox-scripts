@@ -1,5 +1,9 @@
 ﻿#SingleInstance, force
+#MaxHotkeysPerInterval 9999
+#MaxThreadsPerHotkey 1
 StringCaseSense, On
+SetKeyDelay, -1, -1
+SendMode Input
 
 Is_Upper(str) {
   return (str >= "A") and (str <= "Z")
@@ -19,6 +23,8 @@ Gui, Add, Text,, BPM (beats per minute)
 Gui, Add, Edit, w%GuiWidth% vBPM, 100
 Gui, Add, Text,, Transposition
 Gui, Add, Edit, w%GuiWidth% vTranspos, 0
+Gui, Add, Text,, Max Transposition
+Gui, Add, Edit, w%GuiWidth% vMaxTranspos, 24
 Gui, Add, Checkbox, vno_ignore_n, Don't ignore \n
 Gui, Add, Text,, music sheet (keys to press)
 Gui, Add, Edit, r5 w%GuiWidth% vPianoMusic
@@ -46,6 +52,29 @@ Else
 
 N := 1
 KeyDelay := (60000 / BPM)
+
+Loop, %MaxTranspos% * 2
+{
+    Send, {Up}
+}
+Loop, %MaxTranspos%
+{
+    Send, {Down}
+}
+if (Transpos < 0)
+{
+    Loop, %Transpos%
+    {
+        Send, {Down}
+    }
+}
+else if (Transpos > 0)
+{
+    Loop, %Transpos%
+    {
+        Send, {Up}
+    }
+}
 
 while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 {
