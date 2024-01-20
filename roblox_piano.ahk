@@ -64,7 +64,8 @@ Loop, %MaxTranspos%
 }
 if (Transpos < 0)
 {
-    Loop, abs(%Transpos%)
+    Transpos := Abs(Transpos)
+    Loop, %Transpos%
     {
         Send, {Down}
     }
