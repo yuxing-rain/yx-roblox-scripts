@@ -5,14 +5,14 @@ Is_Upper(str) {
   return (str >= "A") and (str <= "Z")
 }
 
-Gui, +AlwaysOnTop
-Gui, Font, s12 Bold, Century Gothic
+Gui, +AlwaysOnTop +Resize +Border +ToolWindow
+Gui, Font, s9 Bold, Century Gothic
 GuiControl, Font, MyEdit
 
 SysGet, MonitorWorkArea, MonitorWorkArea
 ScreenWidth := MonitorWorkAreaRight - MonitorWorkAreaLeft
 
-GuiWidth := 200
+GuiWidth := 150
 GuiX := ScreenWidth - GuiWidth - 120
 
 Gui, Add, Text,, BPM (beats per minute)
@@ -42,8 +42,8 @@ Else
     PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", "")
 }
 
-KeyDelay := (60000 / BPM)
 N := 1
+KeyDelay := (60000 / BPM)
 
 while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 {
@@ -56,7 +56,11 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
     }
     else if (Keys = "|")
     {
-        Sleep, KeyDelay
+        Sleep, KeyDelay * 0.95
+    }
+    else if (Keys = "-")
+    {
+        Sleep, KeyDelay * 0.5
     }
     else if (Is_Upper(Keys))
     {
