@@ -53,8 +53,9 @@ Else
 N := 1
 KeyDelay := (60000 / BPM)
 
-Loop, %MaxTranspos% * 2
+Loop, %MaxTranspos%
 {
+    Send, {Up}
     Send, {Up}
 }
 Loop, %MaxTranspos%
