@@ -29,6 +29,8 @@ Gui, Add, Text,, Numpad2: pause/resume
 Gui, Add, Text,, Numpad3: reopen script
 Gui, Add, Text,, skidded (edited) by yx
 Gui, Add, Text, xm y+10 w%GuiWidth% vKeysToPress, Current Key: 
+Gui, Add, Text, xm y+10 w%GuiWidth% vProgress
+
 Gui, Show, x%GuiX%
 
 Numpad1::
@@ -56,11 +58,11 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
     }
     else if (Keys = "|")
     {
-        Sleep, KeyDelay * 0.95
+        Sleep, KeyDelay * 0.9
     }
     else if (Keys = "-")
     {
-        Sleep, KeyDelay * 0.5
+        Sleep, KeyDelay * 0.6
     }
     else if (Is_Upper(Keys))
     {
@@ -86,8 +88,14 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
         Loop, Parse, Keys
         {
             SendInput {%A_LoopField% up}
+            
         }
     }
+    TotalKeys := StrLen(PianoMusic)
+    PlayedKeys := N-1
+    ProgressPercentage := Round((PlayedKeys / TotalKeys) * 100)
+    GuiControl,, Progress, %PlayedKeys% / %TotalKeys% (%ProgressPercentage%)
+
 }
 return
 
@@ -134,4 +142,8 @@ LoadSheet:
         GuiControl,, BPM, %Bpm%
         GuiControl,, PianoMusic, %str%
     }
+return
+
+gExpandConfig:
+
 return
