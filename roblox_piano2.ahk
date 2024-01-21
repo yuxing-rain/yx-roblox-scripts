@@ -41,15 +41,15 @@ Gui, Tab, 3
 Gui, Add, Text, w%GuiWidth% vKeysToPress, Current Key: 
 Gui, Add, Text, w%GuiWidth% vProgress, Progress
 Gui, Add, Text, r5
-Gui, Add, Text,, Numpad1: play
-Gui, Add, Text,, Numpad2: pause/resume
-Gui, Add, Text,, Numpad3: reopen script
+Gui, Add, Text,, Numpad4: play
+Gui, Add, Text,, Numpad5: pause/resume
+Gui, Add, Text,, Numpad6: reopen script
 Gui, Add, Text,, skidded (edited) by yx
 
 
 Gui, Show, x%GuiX%
 
-Numpad1::
+Numpad4::
 Gui, Submit, Nohide
 If (no_ignore_n)
 {
@@ -140,12 +140,12 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 }
 return
 
-Numpad3::
+Numpad6::
 newScript := A_ScriptFullPath
 Run, %newScript%
 return
 
-Numpad2::
+Numpad5::
 Pause
 Suspend
 return
