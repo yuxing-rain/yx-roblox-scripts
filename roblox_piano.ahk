@@ -6,7 +6,7 @@ SetKeyDelay, -1, -1
 SendMode Input
 
 Is_Upper(str) {
-  return (str >= "A") and (str <= "Z")
+  Return (str >= "A") and (str <= "Z")
 }
 
 Gui, +AlwaysOnTop +Resize +Border +ToolWindow
@@ -28,7 +28,7 @@ Gui, Add, Edit, w%GuiWidth% vBPM, 120
 Gui, Add, Text,, Transpose
 Gui, Add, Edit, w%GuiWidth% vTranspose, 0
 Gui, Add, Text,, music sheet (keys to press)
-Gui, Add, Edit, r5 w%GuiWidth% vPianoMusic
+Gui, Add, Edit, r2 w%GuiWidth% vPianoMusic
 Gui, Add, Button, gSaveSheet, Save Sheet
 Gui, Add, Button, gLoadSheet, Load Sheet
 
@@ -40,16 +40,36 @@ Gui, Add, Checkbox, vno_ignore_n, Don't ignore \n
 Gui, Tab, 3
 Gui, Add, Text, w%GuiWidth% vKeysToPress, Current Key: 
 Gui, Add, Text, w%GuiWidth% vProgress, Progress
-Gui, Add, Text, r5
-Gui, Add, Text,, Numpad1: play
-Gui, Add, Text,, Numpad2: pause/resume
-Gui, Add, Text,, Numpad3: reopen script
+Gui, Add, Text, w%GuiWidth% vPaused
+Gui, Add, Button, gPlay, Numpad1: play
+Gui, Add, Button, gTogglePause, Numpad2: pause/resume
+Gui, Add, Button, gStop, Numpad3: stop
+Gui, Add, Button, gReopen, Numpad0: reopen script
 Gui, Add, Text,, skidded (edited) by yx
 
 
 Gui, Show, x%GuiX%
 
+IsPlaying := False
+Paused := False
+
 Numpad1::
+Goto, Play
+Return
+
+Numpad2::
+Goto, TogglePause
+Return
+
+Numpad3::
+Goto, Stop
+Return
+
+Numpad0::
+Goto, Reopen
+Return
+
+Play:
 Gui, Submit, Nohide
 If (no_ignore_n)
 {
@@ -88,8 +108,20 @@ else if (Transpose > 0)
     }
 }
 
+IsPlaying := True
 while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 {
+    If (Paused == True)
+    {
+        While, (Paused == True)
+        {
+            Sleep, 10
+        }
+    }
+    If (IsPlaying == False)
+    {
+        Break
+    }
     N += StrLen(Keys)
     Keys := Trim(Keys, "[]")
     StringUpper, DisplayText, Keys
@@ -136,22 +168,30 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
     PlayedKeys := N-1
     ProgressPercentage := Round((PlayedKeys / TotalKeys) * 100)
     GuiControl,, Progress, %PlayedKeys% / %TotalKeys% (%ProgressPercentage%)
-
 }
-return
+Return
 
-Numpad3::
+Reopen:
 newScript := A_ScriptFullPath
 Run, %newScript%
-return
+Return
 
-Numpad2::
-Pause
-Suspend
-return
+TogglePause:
+Paused := not Paused
+If (Paused == True)
+{
+    GuiControl,, Paused, Paused
+}
+Else
+{
+    GuiControl,, Paused, 
+}
+Return
 
-GuiClose:
-ExitApp
+Stop:
+IsPlaying := False
+Paused := False
+Return
 
 SaveSheet:
     InputBox, SheetName, Save Music Sheet, Enter the name of the sheet:
@@ -165,7 +205,7 @@ SaveSheet:
         FileDelete, %A_ScriptDir%\MusicSheets\%SheetName%.txt
         FileAppend, <%Transpose%>{%BPM%}%PianoMusic%, %A_ScriptDir%\MusicSheets\%SheetName%.txt
     }
-return
+Return
 
 LoadSheet:
     FileSelectFile, file
@@ -183,18 +223,6 @@ LoadSheet:
         GuiControl,, BPM, %Bpm%
         GuiControl,, PianoMusic, %str%
     }
-return
-
-ToggleMinimize := False
-ToggleMini:
-ToggleMinimize := not ToggleMinimize
-If (ToggleMinimize)
-{
-}
-Else
-{
-    Gui, Show, AutoSize
-}
 Return
 
 TabChanged:
