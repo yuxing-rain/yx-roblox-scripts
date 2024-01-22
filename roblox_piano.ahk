@@ -175,8 +175,7 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 Return
 
 Reopen:
-newScript := A_ScriptFullPath
-Run, %newScript%
+Reload
 Return
 
 TogglePause:
