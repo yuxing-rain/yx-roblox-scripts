@@ -36,6 +36,13 @@ Gui, Tab, 2
 Gui, Add, Text,, Max Transpose
 Gui, Add, Edit, w%GuiWidth% vMaxTranspose, 0
 Gui, Add, Checkbox, vno_ignore_n, Don't ignore \n
+Gui, Add, Text,, Speed of " "
+Gui, Add, Edit, w%GuiWidth% vShortPauseSpeed, 0.25
+Gui, Add, Text,, Speed of note
+Gui, Add, Edit, w%GuiWidth% vNoteSpeed, 0.25
+Gui, Add, Text,, Speed of "|"
+Gui, Add, Edit, w%GuiWidth% vLongPauseSpeed, 1
+
 
 Gui, Tab, 3
 Gui, Add, Text, w%GuiWidth% vKeysToPress, Current Key: 
@@ -127,15 +134,11 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
     StringUpper, DisplayText, Keys
     if (Keys = " ")
     {
-        Sleep, KeyDelay * 0.3
+        Sleep, KeyDelay * ShortPauseSpeed
     }
     else if (Keys = "|")
     {
-        Sleep, KeyDelay * 0.9
-    }
-    else if (Keys = "-")
-    {
-        Sleep, KeyDelay * 0.6
+        Sleep, KeyDelay * LongPauseSpeed
     }
     else if (Is_Upper(Keys))
     {
@@ -144,7 +147,7 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
         {
             SendInput +{%A_LoopField% down}
         }
-        Sleep, KeyDelay * 0.3
+        Sleep, KeyDelay * NoteSpeed
         Loop, Parse, Keys
         {
             SendInput +{%A_LoopField% up}
@@ -157,7 +160,7 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
         {
             SendInput {%A_LoopField% down}
         }
-        Sleep, KeyDelay * 0.3
+        Sleep, KeyDelay * NoteSpeed
         Loop, Parse, Keys
         {
             SendInput {%A_LoopField% up}
@@ -191,6 +194,7 @@ Return
 Stop:
 IsPlaying := False
 Paused := False
+GuiControl,, Paused, 
 Return
 
 SaveSheet:
