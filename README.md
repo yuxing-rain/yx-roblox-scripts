@@ -17,8 +17,11 @@ CatalogGearsList_Module_Ver is for roblox studio module script
 (skidded & edited) roblox piano player : keybinds shown in gui
 - skidded from random website (cant find original creator sad)
 - added current key display
-- added reopen gui
+- added reopen gui, stop playing
 - changed key delay to bpm
 - added "|", caps letter, " " check
+- added save & load file
+- added transpose config
+- added speed of keys config
 
 :sunglasses: best skid
