@@ -8,6 +8,36 @@ SendMode Input
 Is_Upper(str) {
   Return (str >= "A") and (str <= "Z")
 }
+SaveConfigs()
+{
+    GuiControlGet, MaxTranspose, , MaxTranspose
+    GuiControlGet, ShortPauseSpeed, , ShortPauseSpeed
+    GuiControlGet, LongPauseSpeed, , LongPauseSpeed
+    GuiControlGet, NoteSpeed, , NoteSpeed
+    
+    IniWrite, %MaxTranspose%, roblox_piano.ini, Configs, MaxTranspose
+    IniWrite, %ShortPauseSpeed%, roblox_piano.ini, Configs, ShortPauseSpeed
+    IniWrite, %LongPauseSpeed%, roblox_piano.ini, Configs, LongPauseSpeed
+    IniWrite, %NoteSpeed%, roblox_piano.ini, Configs, NoteSpeed
+}
+
+LoadConfigs()
+{
+    filePath := newScript := A_ScriptDir . "\roblox_piano.ini"
+
+if FileExist(filePath)
+    IniRead, MaxTranspose, roblox_piano.ini, Configs, MaxTranspose
+    IniRead, ShortPauseSpeed, roblox_piano.ini, Configs, ShortPauseSpeed
+    IniRead, LongPauseSpeed, roblox_piano.ini, Configs, LongPauseSpeed
+    IniRead, NoteSpeed, roblox_piano.ini, Configs, NoteSpeed
+
+    GuiControl,, MaxTranspose, %MaxTranspose%
+    GuiControl,, ShortPauseSpeed, %ShortPauseSpeed%
+    GuiControl,, LongPauseSpeed, %LongPauseSpeed%
+    GuiControl,, NoteSpeed, %NoteSpeed%
+}
+
+OnExit("SaveConfigs")
 
 Gui, +AlwaysOnTop +Resize +Border +ToolWindow
 Gui, Font, s9 Bold, Century Gothic
@@ -20,7 +50,7 @@ GuiWidth := 150
 GuiX := ScreenWidth - GuiWidth - 120
 
 TabWidth := GuiWidth + 30
-Gui, Add, Tab3, gTabChanged w%TabWidth% r1, General|Config|Display
+Gui, Add, Tab3, gTabChanged w%TabWidth% r1, Sheet|Config|Display|Help
 
 Gui, Tab, 1
 Gui, Add, Text,, BPM (beats per minute)
@@ -45,20 +75,27 @@ Gui, Add, Edit, w%GuiWidth% vLongPauseSpeed, 1
 
 
 Gui, Tab, 3
-Gui, Add, Text, w%GuiWidth% vKeysToPress, Current Key: 
 Gui, Add, Text, w%GuiWidth% vProgress, Progress
 Gui, Add, Text, w%GuiWidth% vPaused
+Gui, Add, Text, w%GuiWidth% vKeysToPress, Current Key: 
+Gui, Add, Text, w%GuiWidth% r2 vNextKeys,
+
+Gui, Tab, 4
 Gui, Add, Button, gPlay, Numpad1: play
 Gui, Add, Button, gTogglePause, Numpad2: pause/resume
 Gui, Add, Button, gStop, Numpad3: stop
 Gui, Add, Button, gReopen, Numpad0: reopen script
 Gui, Add, Text,, skidded (edited) by yx
+Gui, Add, Checkbox, vPrMode, Practice mode
 
 
 Gui, Show, x%GuiX%
 
 IsPlaying := False
 Paused := False
+
+LoadConfigs()
+
 
 Numpad1::
 Goto, Play
@@ -78,11 +115,12 @@ Return
 
 Play:
 Gui, Submit, Nohide
-If (no_ignore_n)
+GuiControl, Choose, Tab, 3
+if (no_ignore_n)
 {
     PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", " ")
 }
-Else
+else
 {
     PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", "")
 }
@@ -118,17 +156,19 @@ else if (Transpose > 0)
 IsPlaying := True
 while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 {
-    If (Paused == True)
+    if (Paused)
     {
-        While, (Paused == True)
+        while, (Paused)
         {
             Sleep, 10
         }
     }
-    If (IsPlaying == False)
+    if (IsPlaying == False)
     {
-        Break
+        break
     }
+    KeysDisplay := SubStr(PianoMusic, N, 50)
+    GuiControl,, NextKeys, %KeysDisplay%
     N += StrLen(Keys)
     Keys := Trim(Keys, "[]")
     StringUpper, DisplayText, Keys
@@ -140,31 +180,58 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
     {
         Sleep, KeyDelay * LongPauseSpeed
     }
-    else if (Is_Upper(Keys))
-    {
-        GuiControl,, KeysToPress, Current Key: shift + %DisplayText%
-        Loop, Parse, Keys
-        {
-            SendInput +{%A_LoopField% down}
-        }
-        Sleep, KeyDelay * NoteSpeed
-        Loop, Parse, Keys
-        {
-            SendInput +{%A_LoopField% up}
-        }
-    }
     else
     {
-        GuiControl,, KeysToPress, Current Key: %DisplayText%
-        Loop, Parse, Keys
+        if (Is_Upper(Keys))
         {
-            SendInput {%A_LoopField% down}
-        }
-        Sleep, KeyDelay * NoteSpeed
-        Loop, Parse, Keys
-        {
-            SendInput {%A_LoopField% up}
+            GuiControl,, KeysToPress, Current Key: shift + %DisplayText%
+            if (not PrMode)
+            {
+            Loop, Parse, Keys
+            {
+                SendInput +{%A_LoopField% down}
+            }
+            Sleep, KeyDelay * NoteSpeed
+            Loop, Parse, Keys
+            {
+                SendInput +{%A_LoopField% up}
+            }
+            }
             
+        }
+        else
+        {
+            GuiControl,, KeysToPress, Current Key: %DisplayText%
+            if (not PrMode)
+            {
+            Loop, Parse, Keys
+            {
+                SendInput {%A_LoopField% down}
+            }
+            Sleep, KeyDelay * NoteSpeed
+            Loop, Parse, Keys
+            {
+                SendInput {%A_LoopField% up}
+
+            }
+            }
+        }
+        if (PrMode)
+        {
+            len := StrLen(Keys)
+            Loop, %len%
+            {
+                Loop
+                {
+                    Input, OutputVar, I L1 V
+                    if (OutputVar != "" and InStr(Keys, OutputVar))
+                    {
+                        Break
+                    }
+                    Sleep, 0
+                }
+                Sleep, 0
+            }
         }
     }
     TotalKeys := StrLen(PianoMusic)
@@ -180,11 +247,11 @@ Return
 
 TogglePause:
 Paused := not Paused
-If (Paused == True)
+if (Paused)
 {
     GuiControl,, Paused, Paused
 }
-Else
+else
 {
     GuiControl,, Paused, 
 }
@@ -231,3 +298,6 @@ Return
 TabChanged:
     Gui, Show, AutoSize
 Return
+
+GuiClose:
+ExitApp
