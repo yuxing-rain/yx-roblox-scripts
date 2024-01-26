@@ -5,9 +5,10 @@ StringCaseSense, On
 SetKeyDelay, -1, -1
 SendMode Input
 
-Is_Upper(str) {
+is_Upper(str) {
   Return (str >= "A") and (str <= "Z")
 }
+
 SaveConfigs()
 {
     GuiControlGet, MaxTranspose, , MaxTranspose
@@ -50,7 +51,7 @@ GuiWidth := 150
 GuiX := ScreenWidth - GuiWidth - 120
 
 TabWidth := GuiWidth + 30
-Gui, Add, Tab3, gTabChanged w%TabWidth% r1, Sheet|Config|Display|Help
+Gui, Add, Tab3, vTab gTabChanged w%TabWidth% r1, Sheet|Config|Display|Help
 
 Gui, Tab, 1
 Gui, Add, Text,, BPM (beats per minute)
@@ -71,8 +72,8 @@ Gui, Add, Edit, w%GuiWidth% vShortPauseSpeed, 0.25
 Gui, Add, Text,, Speed of note
 Gui, Add, Edit, w%GuiWidth% vNoteSpeed, 0.25
 Gui, Add, Text,, Speed of "|"
-Gui, Add, Edit, w%GuiWidth% vLongPauseSpeed, 1
-
+Gui, Add, Edit, w%GuiWidth% vLongPauseSpeed, 0.75
+; "tt" is 1/4 note, "t t" is 1/2 note, "t|t" is 1 note
 
 Gui, Tab, 3
 Gui, Add, Text, w%GuiWidth% vProgress, Progress
@@ -115,7 +116,6 @@ Return
 
 Play:
 Gui, Submit, Nohide
-GuiControl, Choose, Tab, 3
 if (no_ignore_n)
 {
     PianoMusic := RegExReplace(PianoMusic, "[\n\r/]", " ")
@@ -126,6 +126,7 @@ else
 }
 
 N := 1
+prevKeys := ""
 KeyDelay := (60000 / BPM)
 
 Loop, %MaxTranspose%
@@ -152,16 +153,17 @@ else if (Transpose > 0)
         Send, {Up}
     }
 }
-
+prevWindow := WinExist("A")
+GuiControl, Choose, Tab, |3
+Sleep, 1
+WinActivateBottom, ahk_id %prevWindow%
 IsPlaying := True
 while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
 {
     if (Paused)
     {
         while, (Paused)
-        {
-            Sleep, 10
-        }
+        {}
     }
     if (IsPlaying == False)
     {
@@ -170,6 +172,11 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
     KeysDisplay := SubStr(PianoMusic, N, 50)
     GuiControl,, NextKeys, %KeysDisplay%
     N += StrLen(Keys)
+    IsTrimmed := False
+    if Trim(Keys, "[]") != Keys
+    {
+        IsTrimmed := True
+    }
     Keys := Trim(Keys, "[]")
     StringUpper, DisplayText, Keys
     if (Keys = " ")
@@ -179,10 +186,14 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
     else if (Keys = "|")
     {
         Sleep, KeyDelay * LongPauseSpeed
+        if (prevKeys = "|")
+        {
+            Sleep, KeyDelay * NoteSpeed
+        }
     }
     else
     {
-        if (Is_Upper(Keys))
+        if (is_Upper(Keys))
         {
             GuiControl,, KeysToPress, Current Key: shift + %DisplayText%
             if (not PrMode)
@@ -218,14 +229,16 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
         }
         if (PrMode)
         {
+            PressedKeys := []
             len := StrLen(Keys)
             Loop, %len%
             {
                 Loop
                 {
                     Input, OutputVar, I L1 V
-                    if (OutputVar != "" and InStr(Keys, OutputVar))
+                    if (OutputVar != "" and InStr(Keys, OutputVar) and not PressedKeys[OutputVar])
                     {
+                        PressedKeys[OutputVar] := True
                         Break
                     }
                     Sleep, 0
@@ -234,6 +247,7 @@ while (N := RegExMatch(PianoMusic, "U)(\[.*]|.)", Keys, N))
             }
         }
     }
+    prevKeys := Keys
     TotalKeys := StrLen(PianoMusic)
     PlayedKeys := N-1
     ProgressPercentage := Round((PlayedKeys / TotalKeys) * 100)
@@ -260,7 +274,15 @@ Return
 Stop:
 IsPlaying := False
 Paused := False
+Sleep, 10
 GuiControl,, Paused, 
+GuiControl,, NextKeys, 
+GuiControl,, Progress, 
+GuiControl,, KeysToPress, 
+prevWindow := WinExist("A")
+GuiControl, Choose, Tab, |1
+Sleep, 1
+WinActivateBottom, ahk_id %prevWindow%
 Return
 
 SaveSheet:
