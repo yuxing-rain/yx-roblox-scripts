@@ -24,7 +24,7 @@ CatalogGearsList_Module_Ver is for roblox studio module script
 - added transpose config
 - added speed of keys config
 
-(wow first time not skidded) univTerm : its called that cuz idk it should be called cmdbar
+(--wow first time not skidded-- just realised the cmdbar gui is skidded) univTerm : its called that cuz idk it should be called cmdbar
 - random cmds
 - i put it here cuz my friend asked me to make a cmdbar that works for everyone
 
