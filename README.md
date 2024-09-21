@@ -21,4 +21,8 @@ CatalogGearsList_Module_Ver is for roblox studio module script
 - added transpose config
 - added speed of keys config
 
+(original) Spammer & Flicker:
+spammer just to spam keys fast
+flicker for some evil stuff :)
+
 :sunglasses: best skid
