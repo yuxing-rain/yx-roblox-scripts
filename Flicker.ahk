@@ -9,48 +9,53 @@ FileEncoding "UTF-8"
 #MaxThreadsPerHotkey 99999
 
 MyGui := Gui("+AlwaysOnTop")
-MyGui.SetFont("s" 12 " c0xC5C5C5", "Consolas")
-
-MyGui.BackColor := "222222"
+MyGui.SetFont("s12", "Consolas")
 
 MyGui.OnEvent("Close", (*) => ExitApp())
 
-MyGui.Add("Text", , "Flicker v1 - Seele")
+MyGui.Add("Text", , "Flicker v2 - Seele")
+
 MyGui.Add("Text", , "`nHotkey:")
-MyHk := MyGui.Add("Hotkey")
+MyHk := MyGui.Add("Hotkey", "w200")
+
 MyGui.Add("Text", , "`nSensitivity:")
-MyGui.Add("Text", , "change it to turning abt 110 degree")
-MyEdit := MyGui.Add("Edit", , "1000")
-MyEdit.SetFont("c000000")
+MyGui.Add("Text", , "change it to turning abt 170 degree")
+MyEdit1 := MyGui.Add("Edit", "w200", "1000")
+
+MyGui.Add("Text", , "`nDelay:")
+MyGui.Add("Text", , "16 is good")
+MyEdit2 := MyGui.Add("Edit", "w200", "16")
+
 MyGui.Add("Text", , "`n")
-MyBtn := MyGui.Add("Button",, "Confirm change hotkey and sens to flick")
+MyBtn := MyGui.Add("Button",, "Confirm")
 
 MyBtn.OnEvent("Click", Toggle)
 
-oldHk := ""
-
-oldEdit := ""
+Hk := ""
+Sens := 0
+Delay := 0
 
 Toggle(*) {
     global
-    if oldHk
-        Hotkey("$" oldHk, "Off")
-    oldHk := MyHk.Value
-    oldEdit := MyEdit.Value
+    if Hk
+        Hotkey("$" Hk, "Off")
+    Hk := MyHk.Value
+    Sens := MyEdit1.Value
+    Delay := MyEdit2.Value
 
-    Hotkey("$" oldHk, (*) => Spam(oldHk, oldEdit), "On")
+    Hotkey("$" Hk, (*) => MyFunc(Hk, Sens, Delay), "On")
 }
 
-Spam(hk, edit) {
+MyFunc(Hk, Sens, Delay) {
     static isdoing := isdoing ?? false
     if isdoing
         return
     isdoing := true
-    while GetKeyState(hk, "P") {
-        BtMouseMove(-edit, 0, true)
-        Sleep(1)
-        BtMouseMove(edit, 0, true)
-        Sleep(2)
+    while GetKeyState(Hk, "P") {
+        BtMouseMove(-Sens, 0, true)
+        Sleep(Delay)
+        BtMouseMove(Sens, 0, true)
+        Sleep(Delay)
     }
     isdoing := false
 }
