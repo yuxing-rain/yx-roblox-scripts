@@ -22,7 +22,7 @@ CatalogGearsList_Module_Ver is for roblox studio module script
 - added speed of keys config
 
 (original) Spammer & Flicker:
-spammer just to spam keys fast
-flicker for some evil stuff :)
+- spammer just to spam keys fast
+- flicker for some evil stuff :)
 
 :sunglasses: best skid
