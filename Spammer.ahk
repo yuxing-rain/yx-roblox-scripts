@@ -13,22 +13,22 @@ MyGui.SetFont("s12", "Consolas")
 
 MyGui.OnEvent("Close", (*) => ExitApp())
 
-MyGui.Add("Text", , "Spammer v2 - Seele")
-MyGui.Add("Text", , "open multi macros to spam multi keys")
+MyGui.Add("Text", , "Spammer v2.1 - Seele")
+MyGui.Add("Text", "w300", "open multi macros to spam multi keys")
 
 MyGui.Add("Text", , "`nHotkey:")
-MyHk := MyGui.Add("Hotkey", "w200")
+MyHk := MyGui.Add("Hotkey", "w300")
 
 MyGui.Add("Text", , "`nKey to spam:")
-MyGui.Add("Text", , "left click: LButton; right click: RButton; `nkeyboard buttons: small letter")
-MyEdit1 := MyGui.Add("Edit", "w200")
+MyGui.Add("Text", "w300", "left click: LButton; right click: RButton; `nkeyboard buttons: small letter")
+MyEdit1 := MyGui.Add("Edit", "w300")
 
 MyGui.Add("Text", , "`nDelay:")
-MyGui.Add("Text", , "-1 for very little delay; -2 for no delay (might cause lag)")
-MyEdit2 := MyGui.Add("Edit", "w200", "0")
+MyGui.Add("Text", "w300", "-1 for very little delay; -2 for no delay (might cause lag)")
+MyEdit2 := MyGui.Add("Edit", "w300", "0")
 
 MyGui.Add("Text", , "`n")
-MyBtn := MyGui.Add("Button",, "Confirm")
+MyBtn := MyGui.Add("Button", "w300", "Confirm")
 
 MyBtn.OnEvent("Click", Toggle)
 
@@ -58,7 +58,7 @@ MyFunc(hk, key, delay) {
         Send("{" key "}")
         if delay > -1 {
             Sleep(delay)
-        } else if delay == -1{
+        } else if delay == -1 {
             count++
             if Mod(count, 10) == 0 {
                 Sleep(1)
